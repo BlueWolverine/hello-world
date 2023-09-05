@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+  namespace: hivesec
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: virus_avira
+            image: 172.16.12.16:8000/test/virus_avira:latest
+            imagePullPolicy: Always
+          imagePullSecrets:
+          - name: hivesec-test-secret
+          restartPolicy: OnFailure
