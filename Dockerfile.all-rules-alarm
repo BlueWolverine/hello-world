@@ -1,0 +1,149 @@
+
+FROM --platform=linux/amd64 my-registry/busybox AS build
+# 未指定镜像的 tag 标签
+# FROM 别名 (stage name) 必须唯一
+
+
+WORKDIR /home
+# WORKDIR路径不为绝对路径
+
+
+RUN ["kill -9 9090 && free -h"]
+# RUN指令中使用了没有意义的命令
+LABEL version=3.4.1.12
+
+RUN ["vim test.yaml"]
+# RUN指令中使用了没有意义的命令
+# 多个连续 RUN 指令。考虑合并。
+LABEL version=3.4.1.13
+
+RUN service ssh status && ps -ef 
+RUN rm -rf /test.yaml && shutdown eht0
+# RUN指令中使用了没有意义的命令
+LABEL version=3.4.1.13.1
+
+
+RUN ssh 172.16.6.49 
+RUN mount /dev/sda /data
+# RUN指令中使用了没有意义的命令
+
+LABEL version=3.4.1.13.3
+RUN ifconfig eth0
+# RUN指令中使用了没有意义的命令
+
+
+RUN ["ssh 192.168.111.10 22"]
+# RUN指令中使用了没有意义的命令
+
+LABEL version=3.4.1.14
+RUN cd /home/test
+# 使用WORKDIR更换目录
+
+
+RUN apt-get update \
+  && sudo apt-get install curl \
+  && cd /usr/src/app \
+  && wget http://google.com \
+  && ps \
+  && curl http://bing.com
+# RUN指令中使用了sudo命令
+# RUN中同时使用'wget'和'curl'
+# 使用WORKDIR更换目录
+# 检查apt-get安装完成后是否删除了软件列表
+# 检查apt-get安装时是否使用了'-y'
+# 检查apt安装时是否安装了多余的包
+# 使用 apt-get install 安装应用时是否指定了软件的版本号
+
+ADD test.yaml /home
+COPY my-error.yaml my-error2.yaml /test
+COPY my-error my-error2 /test
+# COPY 代替 ADD
+# COPY命令包含两个以上的参数时，最后一个参数没有用"/"结尾
+
+
+EXPOSE 98989
+# 暴露端口超出范围
+
+
+RUN yum install httpd-2.24.4 && yum clean all
+# 检查yum安装时是否使用了'-y'
+
+
+RUN apk update \
+  && apk upgrade \
+  && apk add curl \
+  && rm -rf /var/cache/apk/*
+# 'apk add' 中缺少 '--no-cache' 参数
+# 检查apk安装时是否指定了版本  
+
+RUN npm install express \
+  && pip install django==23.3.3
+# 检查npm安装时是否指定了版本
+# pip install安装应该指定--no-cache-dir
+  
+
+RUN npm install express@0.2.3 && pip install kafka 
+# 检查pip安装时是否指定了安装软件的版本  
+# pip install安装应该指定--no-cache-dir
+
+
+HEALTHCHECK --interval=5s --timeout=3s CMD curl -fs http://localhost/ || exit 1
+HEALTHCHECK --interval=5s --timeout=3s CMD curl -fs http://127.0.0.1/ || exit 1
+# 定义了多个HEALTHCHECK
+
+RUN apt update -y 
+# 不要使用'apt'，因为它是一个终端用户工具，而是使用'apt-get'或'apt-cache'。
+
+FROM alpine:latest AS build
+# FROM 别名 (stage name) 必须唯一
+# 未指定镜像的 tag 标签
+
+FROM  alpine:3.1.0 AS final
+COPY --from=final /app/publish .
+# COPY '--from'引用当前stage别名
+
+RUN dnf install nginx
+# dnf install缺少'-y'或'--assumeyes'参数
+# 缺少'dnf clean all'
+# 未指定安装包版本 dnf install -y <package>[=]<version>
+
+RUN zypper install python && zypper update nginx
+# zypper install 中缺少非交互式命令参数
+# 请勿使用 zypper update
+# 缺少'zypper clean'
+# 指定版本 zypper install -y <package>[=]<version>
+
+RUN gem install rack
+# 检查gem安装时是否指定了安装软件的版本
+
+RUN yarn install nginx
+# 未配置'yarn cache clean'
+
+RUN apt-get dist-upgrade 
+# 已使用apt-get-dist升级
+
+
+
+RUN groupadd --gid 5000 newuser \
+    && useradd --home-dir /home/newuser --create-home --uid 5000 \
+        --gid 5000 --shell /bin/sh --skel /dev/null newuser
+# 'useradd'没有指定'-l'或者'--no-log-init'参数
+
+USER root
+# 镜像用户不应为“root”
+		
+	
+ENV PROJ_DIR=/myproj/ \
+    PYTHONPATH=${PROJ_DIR}:${PYTHONPATH}
+# 同一语句中引用 ENV 变量	
+
+
+MAINTAINER "tester"
+# 检查是否使用了MAINTAINER
+
+
+CMD bash /home/start.sh
+CMD bash /home/stop.sh
+ENTRYPOINT  bash /home/start.sh
+# CMD和ENTRYPOINT命令传参时使用JSON格式
+# 存在多个 CMD 指定
